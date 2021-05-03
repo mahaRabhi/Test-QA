@@ -1,0 +1,47 @@
+const webdriver = require('selenium-webdriver');
+const By = webdriver.By;
+const until = webdriver.until;
+const driver = new webdriver.Builder()
+    .forBrowser('firefox')
+    .build();
+var assert = require ('assert');
+var submitBtn = driver.findElement(By.css(".btn"));
+
+// Test : If credentials are incorrect, red message alert is displayed
+
+async function example1() {
+    await driver.get("http://localhost:3000/");
+    await driver.findElement(By.css("#root > div > div > div > div:nth-child(1) > input")).sendKeys("tes@test.com");
+    await driver.findElement(By.css("#root > div > div > div > div:nth-child(2) > input")).sendKeys("test");
+    await driver.findElement(By.css("#root > div > div > div > div:nth-child(3) > input")).click();
+    let el = await driver.findElement(By.css(".alert"));
+    let text = await el.getText();
+    assert.ok(text.startsWith('Désolé, les identifiants sont incorrects.'),'Error Message not displayed')
+}
+example1()
+
+// Test : If credentials are not valid, button "Ajouter la tâche" is disabled
+
+async function example2() {
+    await driver.get("http://localhost:3000/");
+    await driver.findElement(By.css("#root > div > div > div > div:nth-child(1) > input")).sendKeys("tes@test.com");
+    await driver.findElement(By.css("#root > div > div > div > div:nth-child(2) > input")).sendKeys("test");
+    await driver.findElement(By.css("#root > div > div > div > div:nth-child(3) > input")).click();
+    assert.ok((await submitBtn).isDisplayed(true),"eButton is not displayed");
+}
+example2()
+
+// Test : when we add a task, the list is updated
+
+async function example3() {
+    await driver.get("http://localhost:3000/");
+    await driver.findElement(By.css("#root > div > div > div > div:nth-child(1) > input")).sendKeys("test@test.com");
+    await driver.findElement(By.css("#root > div > div > div > div:nth-child(2) > input")).sendKeys("test");
+    await driver.findElement(By.css("#root > div > div > div > div:nth-child(3) > input")).click();
+    await driver.findElement(By.css("div.col:nth-child(1) > input:nth-child(2)")).sendKeys("Add script");
+    await driver.findElement(By.css("div.col:nth-child(2) > input:nth-child(2)")).sendKeys("Add script description");
+    //await driver.findElement(By.css(".btn")).click();
+    await driver.findElement(By.css(".list-group-item"));
+    assert.fail("UnhandledPromiseRejectionWarning: NoSuchElementError: Unable to locate element: .list-group-item");
+}
+example3()
